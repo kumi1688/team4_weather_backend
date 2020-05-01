@@ -39,12 +39,9 @@ else if (nowTime >= 20 && nowTime < 23) _hours = "0800";
 else if (nowTime >= 23) _hours = "2300";
 else _hours = "0200";
 
-// getAvailableTime();
 // 특정 위치의 받아올 수 있는 모든 데이터 받아오기
 function getAvailableDay() {
   const now = new Date();
-  // const firstMonth = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  // const firstDate = new Date(now.getFullYear(), now.getMonth(), 0);
   let today, yesterday;
 
   // 이번달이 첫 달, 첫 날이면 지난해 마지막 달 마지막 날 데이터 가져오기
@@ -54,7 +51,7 @@ function getAvailableDay() {
   } else if (now.getDate() === 1) {
     // 이번달이 첫 달은 아닌데 첫 날이 경우 지난 달 마지막 날 데이터 가져오기
     today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    yesterday = new Date(now.getFullYear(), now.getMonth() - 1, 0);
+    yesterday = new Date(now.getFullYear(), now.getMonth(), 0);
   } else {
     today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
@@ -68,12 +65,12 @@ async function getAllData(x, y) {
     today.getMonth() + 1 < 10
       ? "0" + (today.getMonth() + 1)
       : today.getMonth() + 1
-  }${today.getDate()}`;
+  }${today.getDate() < 10 ? '0' + today.getDate() : today.getDate()}`;
   const yesterdayToString = `${yesterday.getFullYear()}${
     yesterday.getMonth() + 1 < 10
       ? "0" + (yesterday.getMonth() + 1)
       : yesterday.getMonth() + 1
-  }${yesterday.getDate()}`;
+  }${yesterday.getDate() < 10 ? '0' + yesterday.getDate() : yesterday.getDate()}`;
 
   const availableDays = [todayToString, yesterdayToString];
   console.log(availableDays);

@@ -1,8 +1,8 @@
 const axios = require("axios");
-const weatherStation = require("./weatherStation.json");
+const weatherStation = require("./weatherStation.json"); // 도,시,마을에 해당하는 X,Y 좌표 모음
 
 // XY 정보 가져오기 (동네예보)
-function getXY(province, city, town) {
+function getXY(province, city, town) { // 도, 시, 마을을 전달 받으면 해당 X,Y좌표를 찾아서 반환 
   const result = weatherStation.find(
     (ws) =>
       ws["1단계"] === province && ws["2단계"] === city && ws["3단계"] === town
@@ -10,7 +10,7 @@ function getXY(province, city, town) {
   return { x: result["격자 X"], y: result["격자 Y"] };
 }
 
-//미세먼지 정보 가져오기
+//전달받은 관측소 정보를 대입한 뒤 공공 데이터 포털에서 미세먼지 정보 가져오기
 async function getDustData(station) {
   const url = `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=${encodeURI(
     station
@@ -59,21 +59,22 @@ function getAvailableDay() {
   return { today, yesterday };
 }
 
+// 어제, 오늘 중에서 가능한 모든 날씨 데이터를 받아오는 함수 
 async function getAllData(x, y) {
-  const { today, yesterday } = getAvailableDay();
+  const { today, yesterday } = getAvailableDay(); // 오늘, 어제 날짜 구하기
+  // 20200511, 20200510 형식으로 오늘, 어제 날짜 변환 
   const todayToString = `${today.getFullYear()}${
     today.getMonth() + 1 < 10
       ? "0" + (today.getMonth() + 1)
       : today.getMonth() + 1
-  }${today.getDate() < 10 ? '0' + today.getDate() : today.getDate()}`;
+    }${today.getDate() < 10 ? '0' + today.getDate() : today.getDate()}`;
   const yesterdayToString = `${yesterday.getFullYear()}${
     yesterday.getMonth() + 1 < 10
       ? "0" + (yesterday.getMonth() + 1)
       : yesterday.getMonth() + 1
-  }${yesterday.getDate() < 10 ? '0' + yesterday.getDate() : yesterday.getDate()}`;
+    }${yesterday.getDate() < 10 ? '0' + yesterday.getDate() : yesterday.getDate()}`;
 
   const availableDays = [todayToString, yesterdayToString];
-  console.log(availableDays);
   const timeQueue = [
     [2, "0200"],
     [5, "0500"],
@@ -83,20 +84,13 @@ async function getAllData(x, y) {
     [17, "1700"],
     [20, "2000"],
     [23, "2300"],
-  ];
+  ]; // 날씨 정보가 공공데이터 포털에 업데이트 되는 시간대 
 
-  const result = Promise.all(
-    availableDays.map((day) =>
-      Promise.all(timeQueue.map((time) => getWeatherData(x, y, day, time[1])))
-    )
-  );
+  const result = Promise.all(availableDays.map((day) => // 어제, 오늘 중 가능한 모든 시간대의 날씨 데이터 받아오기 
+    Promise.all(timeQueue.map((time) => getWeatherData(x, y, day, time[1])))));
   return result;
 }
 
-//service key
-//rQjnKIBh3WlSp%2BF8BMs3nzy30zT1zEujUFXCVobY7HQfuR%2Ba7KJvBpvGIRBQhnlLGR2MT3WgggFJIMgClfYZnA%3D%3D
-//another service key
-//fQQmInPFuI3k1pbQjX1BaCfOE6zFzNXa9hXAEs92vl6OI140GB+GkwowNuF0YyKuRNTRFy/5BWAZb7N0ZfDuUw==
 // 특정 날짜, 특정 시간 데이터 받아오기
 function getWeatherData(x, y, day, time) {
   var url =

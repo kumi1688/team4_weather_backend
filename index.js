@@ -1,7 +1,9 @@
 const { getXY, getDustData, getAllData } = require("./weather_get");
 var mqtt = require("mqtt");
+const {mqttBrokerIP} = require('./env')
+
 var options = {
-  host: "13.125.207.178",
+  host: mqttBrokerIP,
   port: 1883,
   protocol: "mqtt",
 };
@@ -19,11 +21,12 @@ client.on("error", (error) => {
 client.subscribe("req/weather/weather"); // 날씨 받아오기
 client.subscribe("req/weather/dust"); // 미세먼지 받아오기
 
-const fs = require("fs");
 client.on("message", async (topic, message, packet) => {
   if (topic === "req/weather/weather") { // 날씨 정보 요청에 대한 응답
     const { province, city, town } = JSON.parse(message); // 도, 시, 마을 정보 분해할당
+    
     const loc = getXY(province, city, town);  // 도,시,마을에 대한 X,Y 좌표 찾기
+    
     const weatherData = await getAllData(loc.x, loc.y); // 공공데이터 포털에서 X,Y 에 해당하는 날씨 정보 받아오기
 
     // 공공데이터 포텔에서 받아온 데이터 중에서 실제 데이터 부분만 추출하기
@@ -32,6 +35,7 @@ client.on("message", async (topic, message, packet) => {
     data = data.filter((d) => d.response.body);
     data = data.map((d) => d.response.body.items);
 
+    
     client.publish("res/weather/weather", JSON.stringify(data)); // 추출한 날씨 데이터 전송하기
   } else if (topic === "req/weather/dust") { // 미세먼지 자료 요청에 대한 응답
     const { station } = JSON.parse(message); // 관측소 정보 분해할당 

@@ -1,6 +1,8 @@
 const axios = require("axios");
 const weatherStation = require("./weatherStation.json"); // 도,시,마을에 해당하는 X,Y 좌표 모음
 
+const serviceKey = 'xb1lkqC0bR8soSfTPW0%2Bqq0zsLEru4TncVCPk84woIbvRRps%2Beb%2BiY72UGe14z8kdfI8iYrCNOZE71JVhNSbIg%3D%3D';
+
 // XY 정보 가져오기 (동네예보)
 function getXY(province, city, town) { // 도, 시, 마을을 전달 받으면 해당 X,Y좌표를 찾아서 반환 
   const result = weatherStation.find(
@@ -14,7 +16,7 @@ function getXY(province, city, town) { // 도, 시, 마을을 전달 받으면 �
 async function getDustData(station) {
   const url = `http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?stationName=${encodeURI(
     station
-  )}&dataTerm=month&pageNo=1&numOfRows=10&ServiceKey=rtVVwR6hnZErSceeqbvBPb9%2B6039VEkeewcHjC60EFIUnvJ%2FX%2BZ92jvi8DmR0mgX7GyvXlEE%2BV9pUnGMGQqKUA%3D%3D&ver=1.3&_returnType=json`;
+  )}&dataTerm=month&pageNo=1&numOfRows=10&ServiceKey=${serviceKey}&ver=1.3&_returnType=json`;
   const result = await axios.get(url);
   return result.data;
 }
